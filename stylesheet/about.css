@@ -1,0 +1,51 @@
+
+.about-page h1{
+   background-color: antiquewhite;
+   padding: 1vw;
+   font-size: 1vw;
+}
+.about-us-section{
+   padding: 1rem;
+   width: 100%;
+   height: auto;
+}
+.about-our-store-two{
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 3vw 0 0 0;
+}
+.first{ 
+    width: 50%;
+}
+.first img{
+    height: 40vw;
+    width: 45vw;
+    filter: grayscale(100%);
+}
+.first img:hover{
+    filter: grayscale(0%);
+}
+.first:nth-child(2){
+    padding: 1vw;
+}
+.text-about{
+    font-size: 3vw;
+}
+.text-pasag{
+    font-size: 1vw;
+}
+.two-list-type{
+    padding: 2vw 0;
+}
+.one-type{
+    padding: 1vw;
+}
+.one-type h5{
+    font-size: 1.2vw;
+    margin: 0.5vw 0;
+}
+.text-list{
+    font-size: 1vw;
+    color: #000;
+}

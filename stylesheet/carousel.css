@@ -1,0 +1,42 @@
+/* Carousel CSS */
+#demo {
+  width: 92vw;
+  /* border: 1px solid red; */
+}
+
+.carousel-item {
+  height: 14vw;
+  text-align: center;
+  transition: 0.2s ease-in-out;
+  background-color: grey;
+}
+
+.carousel-item img {
+  width: 92vw;
+  height: 14vw;
+}
+
+header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+body {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+.logo h4 {
+  color: red;
+}
+
+.logo span {
+  font-size: 2vw;
+}
+
+.watches-product-section .shop-now {
+  background-image: none;
+
+}

@@ -1,0 +1,36 @@
+/* .watches-product-section .shop-now{
+    background-image:url(../images/about_bg.jpg);
+    height: 13vw;
+    background-size: 100%;
+    display: flex;
+    justify-content:center;
+    align-items: center;
+    text-align: center;
+    background-repeat: no-repeat;
+
+} */
+.watches-product-section{
+    width: 100%;
+    padding: 1rem;
+}
+.shop-now h1{
+    background-color: antiquewhite;
+   padding: 1vw;
+   font-size: 1vw;
+}
+.sales-product{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1vw;
+    flex-wrap: wrap;
+
+}
+.all-product-shop{
+    width: 20%;
+    display:flex;
+    
+}   
+.fa-solid{
+    border: 1px solid green;
+}

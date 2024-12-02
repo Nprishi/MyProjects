@@ -1,0 +1,66 @@
+.contact-us{
+    width: 100%;
+    padding: 3vw 2vw;
+}
+.all-contact{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.image-contact img{
+    width: 100%;
+    height: 30vw;
+
+}
+.image-contact{
+    width: 25%;
+}
+form{
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    background-color: aliceblue;
+    height: 30vw;
+    padding: 2vw;
+
+}
+form h1{
+    font-size: 1.5vw;
+    margin: 0.5vw 0;
+}
+form p{
+    font-size: 0.9vw;
+    margin: 0.5vw 0;
+}
+input[type=text],input[type=password],input[type=number], input[type=email]{
+    width: 100%;
+    padding: 0.8vw;
+    margin: 0.5vw 0;
+    outline: none;
+    border: none;
+    font-size: 0.8vw;
+}
+textarea{
+    width: 100%;
+    padding: 0.7vw;
+    height: 15vw;
+    margin: 0.5vw 0;
+    outline: none;
+    border: none;
+    font-size: 0.8vw;
+}
+.contact-btn{
+    width: 100%;
+    background-color: black;
+    color: #fff;
+    padding: 1vw;
+    margin: 0vw 0 0 0;
+    font-size: 0.9vw;
+    cursor: pointer;
+}
+.already{
+    text-decoration: none;
+    font-size: 0.9vw;
+    margin: 0.5vw 0;
+}
