@@ -13,7 +13,7 @@ if ($conn->connect_error) {
 }
 
 // Set the character set to UTF-8
-$conn->set_charset("utf8");
+$conn->set_charset("utf8");   
 
 // Enable error reporting (for development purposes)
 // Turn this off in production for security reasons
