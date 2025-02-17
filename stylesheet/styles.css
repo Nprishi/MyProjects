@@ -1,0 +1,359 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "poppins";
+
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1vw 3vw;
+  background-color: #fff;
+  position: sticky;
+  bottom: 10vw;
+  top: 0;
+
+}
+
+header .logo p {
+  font-size: 1vw;
+  font-weight: 700;
+}
+
+header nav {
+  display: flex;
+}
+
+header nav li {
+  list-style-type: none;
+  margin: 0 0.8vw;
+  padding: 0.4vw;
+  position: relative;
+}
+
+.nav-list::after {
+  content: "";
+  position: absolute;
+  bottom: 0.2vw;
+  left: 0.5vw;
+  height: 0.1vw;
+  width: 0%;
+  background-color: #000;
+  transition: 0.5s all ease-in-out;
+}
+
+.nav-list:hover::after {
+  width: 80%;
+}
+
+header nav li a {
+  text-decoration: none;
+  color: #000;
+  font-size: 1vw;
+}
+
+.nav-icon {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.two-nav-btn {
+  text-decoration: none;
+  background-color: #000;
+  color: #e8e8e8;
+  padding: 0.7vw 2vw;
+  margin: 0 1vw;
+}
+
+.two-nav-btn:nth-child(1) {
+  background-color: transparent;
+  border: 1px solid #000;
+  color: #000;
+}
+
+.main-landing-page {
+  height: 43vw;
+  background-image: url(../images/slider4-1.jpg);
+  background-size: cover;
+  flex-wrap: nowrap;
+  background-position: 10vw 0;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 1vw;
+}
+
+.two-main-div {
+  width: 50%;
+  padding: 3vw;
+}
+
+.two-main-div h1 {
+  font-size: 4vw;
+}
+
+.two-main-div p {
+  font-size: 1vw;
+  width: 88%;
+}
+
+.home-btn {
+  padding: 1.3vw 3.2vw;
+  margin: 1vw 0 0 0;
+  outline: none;
+  border: none;
+  background-color: #000;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1vw;
+}
+
+header .logo h3{
+  color: red;
+}
+
+.section-for-three {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4vw 2vw;
+}
+
+.all-image-section {
+  display: flex;
+  justify-content: end;
+  flex-direction: column;
+  align-items: center;
+  height: 35vw;
+  width: 25%;
+  border-radius: 0.5vw;
+  background-image: url("images/pexels-hiago-italo-1808785.jpg");
+  background-size: 100%;
+  background-repeat: no-repeat;
+
+}
+
+.all-image-section:nth-child(2) {
+  background-image: url("images/pexels-jk-films-15345106.jpg");
+}
+
+.all-image-section:nth-child(3) {
+  background-image: url("images/pexels-tuấn-kiệt-jr-1468379.jpg");
+}
+
+.all-image-section figcaption {
+  background-color: #00000074;
+  font-size: 1vw;
+  color: #e8e8e8;
+  padding: 1vw;
+  text-transform: uppercase;
+  border-radius: 0.2vw;
+  font-weight: 700;
+  margin: 0 0 1vw 0;
+}
+
+body p {
+  color: #000;
+  padding: 1vw;
+}
+
+.watches-product-section .watches-section .all-items .watch-price {
+  color: #ff2200;
+  background-color: #fff;
+  font-size: 1vw;
+  text-align: center;
+  border: none;
+  position: absolute;
+  bottom: -4vw;
+  left: 0;
+}
+
+.cart-product {
+  position: absolute;
+  bottom: -3vw;
+  right: 0;
+  padding: 0.5vw;
+  background-color: #ff2200;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.three-btn {
+  background-color: #000;
+  font-size: 1vw;
+  color: #e8e8e8;
+  padding: 0.8vw 1.5vw;
+  margin: 0 0 1vw 0;
+  outline: none;
+  border: none;
+  transition: 0.5s all ease-in-out;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.all-image-section:hover .three-btn {
+  opacity: 100;
+}
+
+.section-for-three .all-image-section img {
+  width: 100%;
+  height: 50vw;
+}
+
+.watches-product-section {
+  width: 100%;
+}
+
+.watches-product-section .watch-text-sec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.watches-product-section .watch-text-sec .watch-description {
+  width: 45%;
+  text-align: center;
+  margin: 0.5vw 0;
+}
+
+.watches-product-section .watch-text-sec .watch-h {
+  font-size: 2vw;
+  position: relative;
+  margin-top: 2vw;
+}
+
+.watches-product-section .watch-text-sec .watch-h::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 0.2vw;
+  width: 100%;
+  background-color: rgb(255, 94, 0);
+}
+
+.watches-product-section .watches-section {
+  padding: 6vw 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.watches-product-section .watches-section .all-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.buy-product {
+  position: absolute;
+  top: 0;
+  right: 0;
+  text-decoration: none;
+  color: #f9f9f9;
+  background-color: #fc5f49;
+  padding: 0.5vw 1vw;
+  text-transform: capitalize;
+  opacity: 0;
+  transition: 0.3s all ease-in-out;
+}
+
+.all-items:hover .buy-product {
+  opacity: 100%;
+}
+
+.watches-product-section .watches-section .all-items .watch-images {
+  background-color: #f9f9f9;
+}
+
+.watches-product-section .watches-section figcaption {
+  font-size: 1vw;
+  margin: 0.8vw 0;
+}
+
+.watches-product-section .watch-product-images {
+  height: 20vw;
+  width: 16vw;
+}
+
+.subsc {
+  width: 100%;
+  padding: 1vw;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.subscribe-div {
+  width: 90%;
+  background-image: url(../images/slider1-1.jpg);
+  height: 25vw;
+  background-size: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  flex-direction: column;
+  padding: 2vw;
+
+}
+
+.subscribe-div p {
+  z-index: 2;
+  color: #e8e8e8;
+}
+
+.subscribe-div h3 {
+  z-index: 2;
+  color: #fff;
+  font-size: 2.5vw;
+}
+
+.twoinput {
+  z-index: 2;
+  width: 80%;
+  margin: 1vw 0 0 0;
+}
+
+.subscribe-div::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150px;
+  height: 100%;
+  width: 55%;
+  background-color: #fc5f49;
+  -webkit-transform: skew(-38deg);
+  transform: skew(-38deg);
+}
+
+.inputtext {
+  width: 30%;
+  padding: 1vw;
+  outline: none;
+  border: none;
+}
+
+.Subscribe {
+  padding: 1vw;
+  outline: none;
+  border: none;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+}
