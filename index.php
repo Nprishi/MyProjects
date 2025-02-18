@@ -438,7 +438,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $categories_query = "SELECT * FROM category ORDER BY category_id ASC LIMIT 4";
     $categories_result = $conn->query($categories_query);
 
-    // Check if categories exist
+    // Check if categories exists
     if ($categories_result && $categories_result->num_rows > 0) {
       while ($category = $categories_result->fetch_assoc()) {
         $category_id = htmlspecialchars($category['category_id']);
@@ -517,10 +517,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     </style>
   </section>
 
-
-  <script>
-
-  </script>
 
   <section class="subsc">
     <div class="subscribe-div">
