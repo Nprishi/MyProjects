@@ -4,25 +4,14 @@ session_start();
 // Database connection
 include 'connect.php';
 
-// Assume user_id is being retrieved from session or request
-$user_id = $_SESSION['user_id']; // or $_GET['user_id'] if passed in URL
-
-if ($user_id) {
-    // Prepare and execute the query to check for the user ID
-    $stmt = $conn->prepare("SELECT * FROM customer WHERE id = ?");
-    $stmt->bind_param("i", $user_id); // assuming id is an integer
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Check if user ID exists
-    if ($result->num_rows > 0) {
-        // User ID exists, redirect to cart.php
-    } else {
-        // User ID does not exists, redirect to login.php
-        header("Location: login.php");
-        exit();
-    }
-}
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+  }
+  
+  $customer_id = $_SESSION['user_id'];
+  $profile = $_SESSION['user_name'] ?? 'Guest';
 ?>
 
 <!DOCTYPE html>
@@ -55,42 +44,44 @@ if ($user_id) {
             <li class="nav-list"><a href="contact.php" class=" mainbtn nav-anchor ">CONTACT</a></li>
         </nav>
         <?php if (isset($_SESSION['user_id'])): ?>
-            <div class="nav-icon">
-                <a class="two-nav-btn profile" href="#">Profile</a>
-                <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
-                <a class="two-nav-btn logout" href="logout.php">Logout</a>
-                <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-                <style>
-                    .order {
-                        background-color: rgb(57, 5, 105);
-                    }
+                <div class="nav-icon">
+                    <a class="two-nav-btn profile" href="#">
+                        <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : "Profile"; ?>
+                    </a>
+                    <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
+                    <a class="two-nav-btn logout" href="logout.php">Logout</a>
+                    <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
+                    <style>
+                        .order {
+                            background-color: rgb(57, 5, 105);
+                        }
 
-                    .order:hover {
-                        background-color: rgb(70, 10, 110);
-                    }
+                        .order:hover {
+                            background-color: rgb(70, 10, 110);
+                        }
 
-                    .profile:hover {
-                        border: 1px solid #1D1B1B;
-                        color: #ff2200;
-                    }
+                        .profile:hover {
+                            border: 1px solid #1D1B1B;
+                            color: #ff2200;
+                        }
 
-                    .logout:hover {
-                        background-color: #1D1B1B;
-                    }
+                        .logout:hover {
+                            background-color: #1D1B1B;
+                        }
 
-                    .fa-store {
-                        margin-right: 1vw;
-                    }
-                </style>
-            </div>
-        <?php else: ?>
-
-            <div class="nav-icon">
-                <a class="two-nav-btn" href="login.php">Login</a>
-                <a class="two-nav-btn" href="signup.php">signup</a>
-                <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-            </div>
-        <?php endif; ?>
+                        .fa-store {
+                            margin-right: 1vw;
+                            border: none;
+                        }
+                    </style>
+                </div>
+            <?php else: ?>
+                <div class="nav-icon">
+                    <a class="two-nav-btn" href="login.php">Login</a>
+                    <a class="two-nav-btn" href="signup.php">Signup</a>
+                    <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
+                </div>
+            <?php endif; ?>
     </header>
 </body>
 

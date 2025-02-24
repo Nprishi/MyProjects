@@ -176,7 +176,9 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         </nav>
         <?php if (isset($_SESSION['user_id'])): ?>
             <div class="nav-icon">
-                <a class="two-nav-btn profile" href="#">Profile</a>
+                <a class="two-nav-btn profile" href="#">
+                    <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : "Profile"; ?>
+                </a>
                 <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
                 <a class="two-nav-btn logout" href="logout.php">Logout</a>
                 <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
@@ -200,14 +202,14 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
                     .fa-store {
                         margin-right: 1vw;
+                        border: none;
                     }
                 </style>
             </div>
         <?php else: ?>
-
             <div class="nav-icon">
                 <a class="two-nav-btn" href="login.php">Login</a>
-                <a class="two-nav-btn" href="signup.php">signup</a>
+                <a class="two-nav-btn" href="signup.php">Signup</a>
                 <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
             </div>
         <?php endif; ?>

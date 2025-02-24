@@ -4,6 +4,15 @@ session_start();
 // Database connection
 include 'connect.php';
 
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+  header("Location: login.php");
+  exit();
+}
+
+$customer_id = $_SESSION['user_id'];
+$profile = $_SESSION['user_name'] ?? 'Guest';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $product_id = $_POST['product_id'];
   $product_name = $_POST['product_name'];
@@ -250,43 +259,44 @@ $conn->close();
     </nav>
 
     <?php if (isset($_SESSION['user_id'])): ?>
-      <div class="nav-icon">
-        <a class="two-nav-btn profile" href="#">Profile</a>
-        <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
-        <a class="two-nav-btn logout" href="logout.php">Logout</a>
-        <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-        <style>
-          .order {
-            background-color: rgb(57, 5, 105);
-          }
+                <div class="nav-icon">
+                    <a class="two-nav-btn profile" href="#">
+                        <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : "Profile"; ?>
+                    </a>
+                    <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
+                    <a class="two-nav-btn logout" href="logout.php">Logout</a>
+                    <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
+                    <style>
+                        .order {
+                            background-color: rgb(57, 5, 105);
+                        }
 
-          .order:hover {
-            background-color: rgb(70, 10, 110);
-          }
+                        .order:hover {
+                            background-color: rgb(70, 10, 110);
+                        }
 
-          .profile:hover {
-            border: 1px solid #1D1B1B;
-            color: #ff2200;
-          }
+                        .profile:hover {
+                            border: 1px solid #1D1B1B;
+                            color: #ff2200;
+                        }
 
-          .logout:hover {
-            background-color: #1D1B1B;
-          }
+                        .logout:hover {
+                            background-color: #1D1B1B;
+                        }
 
-          .fa-store {
-            margin-right: 1vw;
-            border: none;
-          }
-        </style>
-      </div>
-    <?php else: ?>
-
-      <div class="nav-icon">
-        <a class="two-nav-btn" href="login.php">Login</a>
-        <a class="two-nav-btn" href="signup.php">signup</a>
-        <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-      </div>
-    <?php endif; ?>
+                        .fa-store {
+                            margin-right: 1vw;
+                            border: none;
+                        }
+                    </style>
+                </div>
+            <?php else: ?>
+                <div class="nav-icon">
+                    <a class="two-nav-btn" href="login.php">Login</a>
+                    <a class="two-nav-btn" href="signup.php">Signup</a>
+                    <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
+                </div>
+            <?php endif; ?>
 
   </header>
 
