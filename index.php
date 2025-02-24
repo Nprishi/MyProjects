@@ -1,22 +1,23 @@
 <?php
-
 session_start();
 include 'connect.php';
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+  header("Location: login.php");
+  exit();
+}
+
+$customer_id = $_SESSION['user_id'];
+$profile = $_SESSION['user_name'] ?? 'Guest';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $product_id = $_POST['product_id'];
   $quantity = $_POST['quantity'];
   $product_price = $_POST['product_price'];
-  $customer_id = $_SESSION['user_id']; // Logged-in user's ID
-  if (!$customer_id) {
-    header("Location: login.php");
-    exit();
-  }
 
-  $_SESSION['user_name'] = $user['firstName']; // Store the user's name in the session
-  $profile = $user['firstName'];
   // Check if the customer exists
-  $check_customer = $conn->prepare("SELECT id FROM customer WHERE id = ?");
+  $check_customer = $conn->prepare("SELECT customer_id FROM customer WHERE customer_id = ?");
   $check_customer->bind_param("i", $customer_id);
   $check_customer->execute();
   $customer_result = $check_customer->get_result();
@@ -25,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     die("Invalid customer ID.");
   }
 
-  // Check if the product exists in the cart
-  $stmt = $conn->prepare("SELECT * FROM carts WHERE product_id = ?");
-  $stmt->bind_param("i", $product_id);
+  // Check if the product exists in the cart for this customer
+  $stmt = $conn->prepare("SELECT * FROM carts WHERE product_id = ? AND customer_id = ?");
+  $stmt->bind_param("ii", $product_id, $customer_id);
   $stmt->execute();
   $result = $stmt->get_result();
 
@@ -38,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_quantity = min(10, $current_quantity + $quantity); // Max limit is 10
     $new_total_price = $product_price * $new_quantity;
 
-    $update_stmt = $conn->prepare("UPDATE carts SET quantity = ?, product_price = ? WHERE product_id = ?");
-    $update_stmt->bind_param("idi", $new_quantity, $new_total_price, $product_id);
+    $update_stmt = $conn->prepare("UPDATE carts SET quantity = ?, product_price = ? WHERE product_id = ? AND customer_id = ?");
+    $update_stmt->bind_param("idii", $new_quantity, $new_total_price, $product_id, $customer_id);
     $update_stmt->execute();
   } else {
     // Add new product to the cart
@@ -66,19 +67,15 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
   // SQL query to search for products by search_name
   $stmt = $conn->prepare("SELECT * FROM products WHERE search_name LIKE ?");
-  $search_term = "%" . $search_query . "%";  // Add wildcards for partial matching
+  $search_term = "%" . $search_query . "%";
   $stmt->bind_param("s", $search_term);
   $stmt->execute();
   $result = $stmt->get_result();
 
-  if ($result->num_rows > 0) {
-    $has_result = true;
-  } else {
-    $has_result = false;
-  }
+  $has_result = $result->num_rows > 0;
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -242,7 +239,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     <?php if (isset($_SESSION['user_id'])): ?>
       <div class="nav-icon">
         <a class="two-nav-btn profile" href="#">
-          <?= isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : "Profile"; ?>
+          <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : "Profile"; ?>
         </a>
         <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
         <a class="two-nav-btn logout" href="logout.php">Logout</a>
@@ -274,10 +271,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     <?php else: ?>
       <div class="nav-icon">
         <a class="two-nav-btn" href="login.php">Login</a>
-        <a class="two-nav-btn" href="signup.php">signup</a>
+        <a class="two-nav-btn" href="signup.php">Signup</a>
         <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
       </div>
     <?php endif; ?>
+
 
   </header>
 
@@ -513,6 +511,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         width: 15vw;
         align-items: center;
         text-align: center;
+        height: 8vw;
       }
     </style>
   </section>
@@ -755,7 +754,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
   </style>
 
   <script>
-    
     $(document).ready(function() {
       // Handle Add to Cart button click
       $(".cart-product").on("click", function(e) {
@@ -776,6 +774,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
           method: "POST",
           dataType: "json", // Expect JSON response
           data: {
+            action: "add", // <-- Indicate action type
             product_id: productId,
             product_name: productName,
             product_price: productPrice,
@@ -798,8 +797,8 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
             }, 2000);
           },
           error: function(xhr, status, error) {
-            // Show error message on AJAX failure
-            messageTag.text("An error occurred. Please try again.").css("color", "red").fadeIn();
+            console.error("AJAX Error:", status, error, xhr.responseText);
+            messageTag.text("An error occurred: " + xhr.responseText).css("color", "red").fadeIn();
             setTimeout(() => {
               messageTag.fadeOut();
             }, 2000);
@@ -807,6 +806,13 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         });
       });
     });
+    // error: function(xhr, status, error) {
+    //   // Show error message on AJAX failure
+    //   messageTag.text("An error occurred. Please try again.").css("color", "red").fadeIn();
+    //   setTimeout(() => {
+    //     messageTag.fadeOut();
+    //   }, 2000);
+    // },
 
     // JavaScript to handle section closing and persistence
     document.addEventListener('DOMContentLoaded', function() {

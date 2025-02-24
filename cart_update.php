@@ -2,38 +2,62 @@
 session_start();
 include 'connect.php'; // Include database connection
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $cart_id = $_POST['cart_id'];
-    $quantity = $_POST['quantity'];
+    $action = $_POST['action'] ?? '';
 
-    if (isset($cart_id, $quantity) && is_numeric($quantity) && $quantity > 0) {
-        // Update cart quantity in the database
-        $sql = "UPDATE carts SET quantity = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $quantity, $cart_id);
-        $stmt->execute();
-        $stmt->close();
+    if ($action === 'add') {
+        // Handle Add to Cart
+        $product_id = $_POST['product_id'] ?? null;
+        $quantity = $_POST['quantity'] ?? 1;
 
-        // Fetch updated total price for the item
-        $sql = "SELECT 
-                    p.item_price AS product_price, 
-                    (p.item_price * c.quantity) AS total_price 
-                FROM carts c
-                INNER JOIN products p ON c.product_id = p.id
-                WHERE c.id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $cart_id);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
+        if ($product_id && is_numeric($quantity) && $quantity > 0) {
+            // Insert into cart table
+            $sql = "INSERT INTO carts (product_id, quantity) VALUES (?, ?)";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("ii", $product_id, $quantity);
+                if ($stmt->execute()) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Item added to cart!',
+                        'cart_id' => $stmt->insert_id
+                    ]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Failed to add item.']);
+                }
+                $stmt->close();
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Database error.']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid product data.']);
+        }
+    } elseif ($action === 'update') {
+        // Handle Update Cart Quantity
+        $cart_id = $_POST['cart_id'] ?? null;
+        $quantity = $_POST['quantity'] ?? null;
 
-        // Send updated prices back as JSON
-        echo json_encode([
-            'success' => true,
-            'unit_price' => number_format($result['product_price'], 2),
-            'total_price' => number_format($result['total_price'], 2),
-        ]);
+        if ($cart_id && is_numeric($quantity) && $quantity > 0) {
+            $sql = "UPDATE carts SET quantity = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("ii", $quantity, $cart_id);
+                if ($stmt->execute()) {
+                    echo json_encode(['success' => true, 'message' => 'Cart updated successfully!']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Failed to update cart.']);
+                }
+                $stmt->close();
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Database error.']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid cart data.']);
+        }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Invalid data provided.']);
+        echo json_encode(['success' => false, 'message' => 'Invalid action.']);
     }
 }

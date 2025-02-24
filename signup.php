@@ -59,15 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['ajax_validate'])) {
     $firstName = trim($_POST['firstName']);
     $lastName = trim($_POST['lastName']);
     $email = trim($_POST['email']);
-    $password = trim($_POST['pass']);
+    $password = md5($_POST['pass']);
     $phoneNumber = trim($_POST['phoneNumber']);
-
-    // Hash the password securely
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Insert data into the database
     $stmt = $conn->prepare("INSERT INTO customer (firstName, lastName, email, pass, phoneNumber) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $firstName, $lastName, $email, $hashed_password, $phoneNumber);
+    $stmt->bind_param("sssss", $firstName, $lastName, $email, $password, $phoneNumber);
 
     if ($stmt->execute()) {
         $_SESSION['message'] = "Registration successful!";

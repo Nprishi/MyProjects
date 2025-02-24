@@ -37,7 +37,7 @@
         }
     }
 
-    // Order Submission Process
+    // Handel Form Submission 
     if (isset($_POST['submit_order'])) {
         // Capture user and form details
         $user_name = $conn->real_escape_string($_POST['user_name']);
@@ -46,24 +46,27 @@
         $mobile_number = $conn->real_escape_string($_POST['mobile_number']);
         $payment_method = $conn->real_escape_string($_POST['payment_method']);
 
-        // Fetch cart items from session
-        session_start();
-        $cart_items = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+        // Fetch cart items from the database for the logged-in user
+        $cart_items_sql = "SELECT c.*, p.item_name, p.product_description, p.item_price, p.item_image 
+                           FROM carts c 
+                           INNER JOIN products p ON c.product_id = p.id 
+                           WHERE c.customer_id = ?";
+        $stmt = $conn->prepare($cart_items_sql);
+        $stmt->bind_param("i", $customer_id);
+        $stmt->execute();
+        $cart_items_result = $stmt->get_result();
+
         $total_amount = 0;
 
-        // Calculate total amount
-        foreach ($cart_items as $item) {
-            $total_amount += $item['product_price'] * $item['quantity'];
-        }
+        while ($item = $cart_items_result->fetch_assoc()) {
+            $total_amount += $item['item_price'] * $item['quantity'];
 
-        // Insert order into the database
-        foreach ($cart_items as $item) {
             $product_id = $item['product_id'];
-            $product_name = $conn->real_escape_string($item['product_name']);
+            $product_name = $conn->real_escape_string($item['item_name']);
             $product_description = $conn->real_escape_string($item['product_description']);
-            $product_price = $item['product_price'];
+            $product_price = $item['item_price'];
             $quantity = $item['quantity'];
-            $product_img = $item['product_img']; // Assuming it's already available in the session/cart
+            $product_img = $item['item_image'];
 
             $sql = "INSERT INTO myorders (
                         user_name, email, address, mobile_number, 
@@ -75,48 +78,23 @@
                         '$total_amount', '$payment_method', 'Pending', NOW()
                     )";
 
-            if ($conn->query($sql) === TRUE) {
-                // Success
-                echo "<script>alert('Order placed successfully!');</script>";
-            } else {
-                // Error
+            if ($conn->query($sql) !== TRUE) {
                 echo "<script>alert('Error: " . $conn->error . "');</script>";
             }
         }
 
-        // Clear the cart session after the order
-        unset($_SESSION['cart']);
-    }
+        $stmt->close();
 
-    // Fetch the logged-in customer's ID
-    $customer_id = $_SESSION['user_id'] ?? null;
-
-    if ($customer_id) {
-        // Fetch cart items for the logged-in user
-        $sql = "SELECT 
-        c.id AS id, 
-        p.item_name AS product_name, 
-        p.product_description AS product_description, 
-        p.item_price AS product_price, 
-        p.item_image AS product_img, 
-        c.quantity, 
-        (p.item_price * c.quantity) AS total_price
-    FROM carts c
-    INNER JOIN products p ON c.product_id = p.id
-    WHERE c.customer_id = ?";
-
-        $stmt = $conn->prepare($sql);
+        // Clear cart after successful order
+        $clear_cart_sql = "DELETE FROM carts WHERE customer_id = ?";
+        $stmt = $conn->prepare($clear_cart_sql);
         $stmt->bind_param("i", $customer_id);
         $stmt->execute();
-        $result = $stmt->get_result();
-
-        // Close the statement
         $stmt->close();
-    } else {
-        // If the user is not logged in, set $result to null
-        $result = null;
+
+        echo "<script>alert('Order placed successfully!'); window.location.href='cart.php';</script>";
     }
-    $conn->close();
+
     ?>
 
     <!DOCTYPE html>

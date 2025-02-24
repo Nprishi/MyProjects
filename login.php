@@ -1,58 +1,39 @@
 <?php
-session_start();
-include 'connect.php';
+session_start(); // Start the session
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+  include 'connect.php';
+  // Get user input
+  $email = $_POST['email'];
+  $password = md5($_POST['password']);
 
-    echo "<p>User Input:</p>";
-    echo "<pre>Email: $email</pre>";
-    echo "<pre>Password: $password</pre>";
+  // Validate input fields
+  if (empty($email) || empty($password)) {
+    $_SESSION['login_error'] = "Please Enter Your Email And Password.";
+  } elseif (empty($email)) {
+    $_SESSION['login_error'] = "Please Enter Your Email";
+  } elseif (empty($password)) {
+    $_SESSION['login_error'] = "Please Enter Your Password";
+  } else {
+    // Prepare and execute the SQL query
+    $sql = "SELECT * FROM `customer` WHERE email = '$email' AND pass = '$password'";
+    $result = mysqli_query($conn, $sql);
+    $user = mysqli_fetch_assoc($result);
 
-    if (empty($email) || empty($password)) {
-        $_SESSION['login_error'] = "Please enter your email and password.";
-        header("Location: login.php");
-        exit();
-    }
+    if ($user) {
+      // User exists, set session variables
+      $_SESSION['user_id'] = $user['customer_id']; // Store the user's ID in the session
+      $_SESSION['user_name'] = $user['firstName']; // Store the user's name in the session
 
-    // Debug: Print SQL query (without execution)
-    echo "<p>SQL Query:</p>";
-    echo "<pre>SELECT id, firstName, pass FROM customer WHERE email = '$email'</pre>";
-
-    // Use a prepared statement for security
-    $stmt = $conn->prepare("SELECT id, firstName, pass FROM customer WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-
-    // Debug: Print Query Result
-    echo "<p>Query Result:</p>";
-    echo "<pre>";
-    print_r(password_verify($password, $user['pass']));
-    echo "</pre>";
-    // $isPassword = password_verify($password, $user['pass']); 
-    // print_r($isPassword); 
-    $isPasswordCorrect = password_verify($password, $user['pass']);
-
-    echo "<p>Password Verification Result:</p>";
-    echo "<pre>" . ($isPasswordCorrect ? '✅ MATCH' : '❌ NO MATCH') . "</pre>";
-    if ($user && password_verify($password, $user['pass'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_name'] = $user['firstName'];
-
-        header("Location: index.php");
-        exit();
+      // Redirect to the dashboard or protected page
+      header("Location: index.php");
+      exit();
     } else {
-        $_SESSION['login_error'] = "Invalid email or password.";
-        // $_SESSION['login_error'] = $user;
-        // header("Location: login.php");
-        exit();
+      // Login failed
+      $_SESSION['login_error'] = "Your Username and Password is incorrect.";
     }
+  }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -88,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 
 <body>
- 
 
   <?php
   if (isset($_SESSION['message'])) {
@@ -102,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       <div class="image-contact">
         <img src="images/contact.jpg" alt="">
       </div>
-      <form action="" method="POST">
+      <form action="?" method="POST">
         <h1 style="width: 100%; text-align: center;">Log in</h1>
         <?php
         if (isset($_SESSION['message'])) {
