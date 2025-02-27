@@ -12,17 +12,14 @@ $customer_id = $_SESSION['user_id'];
 $profile = $_SESSION['user_name'] ?? 'Guest';
 $result = false; // Initialize $result to prevent "undefined variable" error
 
-$cart_items_sql = "SELECT c.id, c.quantity, p.item_name, p.product_description, 
-                          (p.item_price * c.quantity) AS total_price, p.item_image AS product_img, p.item_price 
-                   FROM carts c 
-                   INNER JOIN products p ON c.product_id = p.id 
-                   WHERE c.customer_id = ?";
-
-$stmt = $conn->prepare($cart_items_sql);
-$stmt->bind_param("i", $customer_id);
+$query = "SELECT carts.*, products.item_price, products.item_image, products.item_name, products.product_description 
+          FROM carts 
+          INNER JOIN products ON carts.product_id = products.id 
+          WHERE carts.customer_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
-
 
 // Handle deleting selected items
 if (isset($_POST['delete_selected']) && !empty($_POST['check'])) {
@@ -71,16 +68,18 @@ if (isset($_POST['submit_order'])) {
     $total_amount = 0;
 
     // Fetch cart items again during order placement
-    $cart_items_sql = "SELECT c.*, p.item_name, p.product_description, p.item_price, p.item_image 
-                   FROM carts c 
-                   INNER JOIN products p ON c.product_id = p.id 
-                   WHERE c.customer_id = ?";
-    $stmt = $conn->prepare($cart_items_sql);
+    $sql = "SELECT c.*, p.item_name, p.product_description, p.product_price, p.item_image, 
+    (c.quantity * p.product_price) AS total_price 
+FROM carts c
+INNER JOIN products p ON c.product_id = p.id
+WHERE c.customer_id = ?";
+    $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $customer_id);
     $stmt->execute();
-    $cart_items_result = $stmt->get_result();
+    $result = $stmt->get_result();
 
-    while ($item = $cart_items_result->fetch_assoc()) {
+
+    while ($item = $result->fetch_assoc()) {
         $product_price = $item['item_price'];
         $quantity = $item['quantity'];
         $total_price = $product_price * $quantity;
@@ -403,24 +402,24 @@ if (isset($_POST['submit_order'])) {
                         <div class="product-card">
                             <input type="checkbox" name="check[]" value="<?= $row['id']; ?>">
                             <div class="product-info">
-                                <img src="<?= htmlspecialchars($row['product_img']); ?>" alt="Product Image" class="product-image">
+                                <img src="<?= htmlspecialchars($row['item_image']); ?>" alt="Product Image" class="product-image">
                                 <div class="product-details">
                                     <h3 class="product-name"><?= htmlspecialchars($row['item_name']); ?></h3>
                                     <p class="product-description"><?= htmlspecialchars($row['product_description']); ?></p>
                                 </div>
                             </div>
                             <div class="product-price">
-                                <span class="current-price">NPR <?= number_format($row['total_price'], 2); ?></span>
+                                <?php $calculated_price = $row['quantity'] * $row['product_price']; ?>
+                                <span class="current-price">NPR <?= number_format($calculated_price, 2); ?></span>
                             </div>
                             <div class="quantity">
                                 <button type="button" class="decrement" data-cart-id="<?= $row['id']; ?>">-</button>
                                 <span class="quantity-number"><?= $row['quantity']; ?></span>
                                 <button type="button" class="increment" data-cart-id="<?= $row['id']; ?>">+</button>
                             </div>
-
                             <div class="fa-icon" style="display: flex; height: 3vw; width: 6vw; position: absolute; right: 40vw; top: 13vw;">
                                 <i class="fa-regular fa-heart"></i>
-                                <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon">
+                                <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon" onclick="return confirm('Are you sure you want to delete this item?');">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </div>
@@ -429,6 +428,7 @@ if (isset($_POST['submit_order'])) {
                 <?php else: ?>
                     <p class="empty_product">No products in the cart.</p>
                 <?php endif; ?>
+
             </form>
             <style>
                 .product-image {
@@ -719,22 +719,21 @@ if (isset($_POST['submit_order'])) {
 
             const updateCart = (cartId, newQuantity) => {
                 if (newQuantity < 1 || newQuantity > 10) {
-                    // alert('Quantity must be between 1 and 10.');
                     return;
                 }
 
-                // Send AJAX request to cart_update.php
+                // Send AJAX request to update cart quantity
                 fetch('cart_update.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         },
-                        body: `cart_id=${cartId}&quantity=${newQuantity}`
+                        body: `action=update&cart_id=${cartId}&quantity=${newQuantity}` // ✅ Fix added here
                     })
                     .then((response) => response.json())
                     .then((data) => {
                         if (data.success) {
-                            // Update quantity and price on the frontend
+                            // Update quantity and price in the UI
                             quantityNumber.textContent = newQuantity;
                             currentPrice.textContent = `NPR ${data.total_price}`;
                             updateSubtotal();
@@ -757,8 +756,6 @@ if (isset($_POST['submit_order'])) {
                 let currentQuantity = parseInt(quantityNumber.textContent);
                 if (currentQuantity > 1) {
                     updateCart(cartId, currentQuantity - 1);
-                } else {
-                    // alert('Minimum quantity is 1.');
                 }
             });
 
@@ -766,11 +763,10 @@ if (isset($_POST['submit_order'])) {
                 let currentQuantity = parseInt(quantityNumber.textContent);
                 if (currentQuantity < 10) {
                     updateCart(cartId, currentQuantity + 1);
-                } else {
-                    // alert('Maximum quantity is 10.');
                 }
             });
         });
+
 
         // Toggle heart icon color on click
         document.querySelectorAll('.fa-heart').forEach((icon) => {
