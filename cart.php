@@ -417,7 +417,7 @@ WHERE c.customer_id = ?";
                                 <span class="quantity-number"><?= $row['quantity']; ?></span>
                                 <button type="button" class="increment" data-cart-id="<?= $row['id']; ?>">+</button>
                             </div>
-                            <div class="fa-icon" style="display: flex; height: 3vw; width: 6vw; position: absolute; right: 40vw; top: 13vw;">
+                            <div class="fa-icon" style="height:5vw; width:6vw; display: flex; margin-top:-5vw;">
                                 <i class="fa-regular fa-heart"></i>
                                 <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon" onclick="return confirm('Are you sure you want to delete this item?');">
                                     <i class="fa-solid fa-trash"></i>
@@ -431,6 +431,10 @@ WHERE c.customer_id = ?";
 
             </form>
             <style>
+                .selected {
+                    border-bottom: 1px solid grey;
+                }
+
                 .product-image {
                     width: 10vw;
                     height: 10vw;
@@ -488,7 +492,7 @@ WHERE c.customer_id = ?";
         <div class="right_side" id="summary">
             <div class="right_side_header">
                 <h3><span>Location</span></h3>
-                <p><i class="fa-solid fa-location-dot"></i> Your Location.....</p>
+                <p id="googleMap" style="cursor: pointer; font-weight:bolder;"><i class="fa-solid fa-location-dot" style="color: red;"></i> <span id="state"></span> </p>
             </div>
 
             <div class="summary">
@@ -646,7 +650,7 @@ WHERE c.customer_id = ?";
     <style>
         footer {
             position: relative;
-            bottom: -13.8vw;
+            bottom: -18vw;
             width: 95vw;
             margin-left: 2vw;
             margin-top: 1vw;
@@ -829,6 +833,39 @@ WHERE c.customer_id = ?";
         // });
 
         // }
+
+        //Get Current Location 
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById("state").innerText = "Geolocation is not supported.";
+            }
+        }
+
+        function showPosition(position) {
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+
+            // Use a reverse geocoding API (Example: OpenStreetMap)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    let state = data.address.state || "Unknown";
+                    document.getElementById("state").innerText = state;
+                })
+                .catch(error => console.error("Error fetching location data:", error));
+        }
+
+        function showError(error) {
+            document.getElementById("state").innerText = "Unable to retrieve location.";
+        }
+
+        getLocation(); // Call function on page load
+
+        document.getElementById("googleMap").addEventListener('click',function(){
+            window.open("https://www.google.com/maps", "_blank");
+        });
     </script>
 
 </body>
