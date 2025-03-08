@@ -468,7 +468,7 @@ $conn->close();
                         <option value="watches">Watches</option>
                         <option value="girls clothes">Girls Clothes</option>
                         <option value="boys clothes">Boys Clothes</option>
-                        <option value="others clothes">Others</option>
+                        <option value="Others clothes">Others</option>
                     </select><br><br>
                     <label>Choose how to add an image:</label><br>
                     <input type="radio" id="upload_option" name="image_option" value="upload" onclick="toggleImageOption()" checked>

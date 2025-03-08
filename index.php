@@ -430,7 +430,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
   </section> -->
 
   <!-- Fetch database items -->
-  <section class="watches-product-section" style="flex-wrap:wrap; border:1px solid red;">
+  <section class="watches-product-section" style="flex-wrap:wrap;">
     <?php
     // Query to fetch all categories in ascending order
     $categories_query = "SELECT * FROM category ORDER BY category_id ASC LIMIT 4";
@@ -466,7 +466,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                 $product_description = htmlspecialchars($product['product_description']);
             ?>
                 <!-- Product Card -->
-                <div class="all-items" style="border:2px solid grey; margin-right:2vw; margin-bottom: 5vw;">
+                <div class="all-items" style="margin-right:2vw; margin-bottom: 5vw; ">
                   <div class="watch-images">
                     <img src="<?php echo $product_img; ?>" alt="<?php echo $product_name; ?>" class="watch-product-images">
                   </div>

@@ -107,9 +107,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
   }
 }
 
-// Close the connection
-$conn->close();
-
 ?>
 
 <!DOCTYPE html>
@@ -259,44 +256,44 @@ $conn->close();
     </nav>
 
     <?php if (isset($_SESSION['user_id'])): ?>
-                <div class="nav-icon">
-                    <a class="two-nav-btn profile" href="#">
-                        <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : "Profile"; ?>
-                    </a>
-                    <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
-                    <a class="two-nav-btn logout" href="logout.php">Logout</a>
-                    <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-                    <style>
-                        .order {
-                            background-color: rgb(57, 5, 105);
-                        }
+      <div class="nav-icon">
+        <a class="two-nav-btn profile" href="#">
+          <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : "Profile"; ?>
+        </a>
+        <a class="two-nav-btn order" href="order.php"><i class="fa-solid fa-store"></i>Order</a>
+        <a class="two-nav-btn logout" href="logout.php">Logout</a>
+        <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
+        <style>
+          .order {
+            background-color: rgb(57, 5, 105);
+          }
 
-                        .order:hover {
-                            background-color: rgb(70, 10, 110);
-                        }
+          .order:hover {
+            background-color: rgb(70, 10, 110);
+          }
 
-                        .profile:hover {
-                            border: 1px solid #1D1B1B;
-                            color: #ff2200;
-                        }
+          .profile:hover {
+            border: 1px solid #1D1B1B;
+            color: #ff2200;
+          }
 
-                        .logout:hover {
-                            background-color: #1D1B1B;
-                        }
+          .logout:hover {
+            background-color: #1D1B1B;
+          }
 
-                        .fa-store {
-                            margin-right: 1vw;
-                            border: none;
-                        }
-                    </style>
-                </div>
-            <?php else: ?>
-                <div class="nav-icon">
-                    <a class="two-nav-btn" href="login.php">Login</a>
-                    <a class="two-nav-btn" href="signup.php">Signup</a>
-                    <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-                </div>
-            <?php endif; ?>
+          .fa-store {
+            margin-right: 1vw;
+            border: none;
+          }
+        </style>
+      </div>
+    <?php else: ?>
+      <div class="nav-icon">
+        <a class="two-nav-btn" href="login.php">Login</a>
+        <a class="two-nav-btn" href="signup.php">Signup</a>
+        <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
+      </div>
+    <?php endif; ?>
 
   </header>
 
@@ -351,14 +348,16 @@ $conn->close();
       <h4 class="search_heading">Recent Search</h4>
       <button class="sh-btn" onclick="sectionClose()"><i class="fa-solid fa-xmark"></i></button>
     </div>
+
     <div class="watches-section shop-section">
       <?php
       // Assuming you have already connected to the database and executed the query
       if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-          $name = isset($row['search_name']) ? htmlspecialchars($row['search_name']) : 'No Name Available';
-          $price = isset($row['search_price']) ? number_format($row['search_price'], 2) : '0.00';
-          $image = isset($row['search_image']) ? htmlspecialchars($row['search_image']) : 'default_image.jpg'; // Use a default image if none found
+          $name = isset($row['item_name']) ? htmlspecialchars($row['item_name']) : 'No Name Available';
+          $descrption = isset($row['product_description']) ? htmlspecialchars($row['product_description']) : 'No description Available';
+          $price = isset($row['item_price']) ? number_format($row['item_price'], 2) : '0.00';
+          $image = isset($row['item_image']) ? htmlspecialchars($row['item_image']) : 'default_image.jpg'; // Use a default image if none found
 
           echo '
                     <div class="all-items" style="margin-right:2vw;">
@@ -366,6 +365,9 @@ $conn->close();
                             <img src="' . $image . '" alt="' . $name . '" class="watch-product-images">
                         </div>
                         <figcaption>' . $name . '</figcaption>
+                         <div class="product-description">
+                  <p> ' . $descrption . '</p>
+                </div>
                         <div class="watch-star">
                             <i class="fa-solid fa-star"></i>
                             <i class="fa-solid fa-star"></i>
@@ -377,14 +379,15 @@ $conn->close();
                         <a href="#" class="buy-product">Buy</a>
 
                         <!-- Form for Adding to Cart -->
-                        <form action="?" method="POST">
+                        <form action="?" method="POST" >
                             <input type="hidden" name="product_id" value="' . $row['id'] . '"> <!-- Assuming id is used here -->
-                            <input type="hidden" name="product_name" value="' . $name . '">
-                            <input type="hidden" name="product_price" value="' . $row['search_price'] . '">
+                            <input type="hidden" name="item_name" value="' . $name . '">
+                            <input type="hidden" name="item_price" value="' . $row['item_price'] . '">
                             <input type="hidden" name="quantity" value="1">
-                            <input type="hidden" name="product_img" value="' . $image . '">
+                            <input type="hidden" name="item_img" value="' . $image . '">
                             <input type="submit" class="cart-product" value="Add Cart">
                         </form>
+                        <p class="cart-message" style="display: none; color: green;"></p>
                     </div>';
         }
       } else {
@@ -392,6 +395,7 @@ $conn->close();
       }
       ?>
     </div>
+
     <style>
       .first-section {
         border: 1px solid red;
@@ -452,236 +456,98 @@ $conn->close();
         position: absolute;
       }
     </style>
+
   </section>
 
-  <!-- Shops Section 1 -->
-  <section class="watches-product-section second-section">
-    <div class="watch-text-sec">
-      <h1 class="watch-h">Shop Here</h1>
-      <p class="watch-description" style="width:100%;">You can purchase different item from here as you required.</p>
-    </div>
+  <!-- Fetch database items -->
+  <section class="watches-product-section" style="flex-wrap:wrap;">
+    <?php
+    // Query to fetch all categories in ascending order
+    $categories_query = "SELECT * FROM category WHERE category_name = 'Others clothes' LIMIT 1";
+    $categories_result = $conn->query($categories_query);
 
-    <div class="watches-section shop-section">
-      <!-- Product 1 -->
-      <div class="all-items">
-        <div class="watch-images">
-          <img src="images/shop (1).jpg" alt="" class="shop-product-images">
+    // Check if categories exists
+    if ($categories_result && $categories_result->num_rows > 0) {
+      while ($category = $categories_result->fetch_assoc()) {
+        $category_id = htmlspecialchars($category['category_id']);
+        $category_name = htmlspecialchars($category['category_name']);
+
+        // Query to fetch products for the current category
+        $products_query = "SELECT * FROM products WHERE category_id = $category_id";
+        $products_result = $conn->query($products_query);
+    ?>
+        <!-- Display Each Seaction -->
+        <div class="mySections">
+
+          <!-- Display Category Name -->
+          <div class="watch-text-sec">
+            <h1 class="watch-h">Shop Now</h1>
+          </div>
+
+          <div class="watches-section" style="display: flex; flex-wrap: wrap; justify-content: space-around; align-items: center;">
+            <?php
+            // Check if products exist for the current category
+            if ($products_result && $products_result->num_rows > 0) {
+              while ($product = $products_result->fetch_assoc()) {
+                $product_id = htmlspecialchars($product['id']);
+                $product_name = htmlspecialchars($product['item_name']);
+                $product_price = htmlspecialchars($product['item_price']);
+                $product_img = htmlspecialchars($product['item_image']);
+                $product_description = htmlspecialchars($product['product_description']);
+            ?>
+                <!-- Product Card -->
+                <div class="all-items" style="margin-right:2vw; margin-bottom: 5vw; ">
+                  <div class="watch-images">
+                    <img src="<?php echo $product_img; ?>" alt="<?php echo $product_name; ?>" class="watch-product-images">
+                  </div>
+                  <h3><?php echo $product_name; ?></h3>
+                  <div class="product-description">
+                    <p><?php echo $product_description; ?></p>
+                  </div>
+                  <div class="watch-star" style="color:orange">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-regular fa-star-half-stroke"></i>
+                  </div>
+                  <p class="watch-price">NPR. <?php echo number_format($product_price, 2); ?></p>
+                  <a href="#" class="buy-product">Buy</a>
+
+                  <!-- Add to Cart Button -->
+                  <button class="cart-product"
+                    data-product-id="<?php echo $product_id; ?>"
+                    data-product-name="<?php echo $product_name; ?>"
+                    data-product-price="<?php echo $product_price; ?>"
+                    data-product-description="<?php echo $product_description; ?>"
+                    data-product-img="<?php echo $product_img; ?>"
+                    data-quantity="1">
+                    Add Cart
+                  </button>
+                  <p class="cart-message" style="display: none; color: green;"></p>
+                </div>
+            <?php
+              }
+            } else {
+              echo "<p>No products found in this category.</p>";
+            }
+            ?>
+          </div>
         </div>
-        <figcaption>Coat</figcaption>
-        <div class="watch-star">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-        </div>
-        <p class="watch-price">NPR.9890</p>
-        <a href="#" class="buy-product">Buy</a>
-
-        <!-- Form for Product 1 -->
-        <form action="?" method="POST">
-          <input type="hidden" name="product_id" value="201">
-          <input type="hidden" name="product_name" value="Coat 1">
-          <input type="hidden" name="product_price" value="9890">
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="product_img" value="images/shop (1).jpg">
-          <input type="submit" class="cart-product" value="Add Cart">
-        </form>
-      </div>
-
-      <!-- Product 2 -->
-      <div class="all-items">
-        <div class="watch-images">
-          <img src="images/shop (2).jpg" alt="" class="shop-product-images">
-        </div>
-        <figcaption>Coat</figcaption>
-        <div class="watch-star">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-regular fa-star-half-stroke"></i>
-        </div>
-        <p class="watch-price">NPR.7255</p>
-        <a href="#" class="buy-product">Buy</a>
-
-        <!-- Form for Product 2 -->
-        <form action="?" method="POST">
-          <input type="hidden" name="product_id" value="202">
-          <input type="hidden" name="product_name" value="Coat 2">
-          <input type="hidden" name="product_price" value="7255">
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="product_img" value="images/shop (2).jpg">
-          <input type="submit" class="cart-product" value="Add Cart">
-        </form>
-      </div>
-
-      <!-- Product 3 -->
-      <div class="all-items">
-        <div class="watch-images">
-          <img src="images/shop (3).jpg" alt="" class="shop-product-images">
-        </div>
-        <figcaption>Coat</figcaption>
-        <div class="watch-star">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-regular fa-star-half-stroke"></i>
-          <i class="fa-regular fa-star"></i>
-        </div>
-        <p class="watch-price">NPR.8150</p>
-        <a href="#" class="buy-product">Buy</a>
-
-        <!-- Form for Product 3 -->
-        <form action="?" method="POST">
-          <input type="hidden" name="product_id" value="203">
-          <input type="hidden" name="product_name" value="Coat 3">
-          <input type="hidden" name="product_price" value="8150">
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="product_img" value="images/shop (3).jpg">
-          <input type="submit" class="cart-product" value="Add Cart">
-        </form>
-      </div>
-
-      <!-- Product 4 -->
-      <div class="all-items">
-        <div class="watch-images">
-          <img src="images/shop (4).jpg" alt="" class="shop-product-images">
-        </div>
-        <figcaption>Coat</figcaption>
-        <div class="watch-star">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-regular fa-star-half-stroke"></i>
-          <i class="fa-regular fa-star"></i>
-        </div>
-        <p class="watch-price">NPR.6550</p>
-        <a href="#" class="buy-product">Buy</a>
-
-        <!-- Form for Product 4 -->
-        <form action="?" method="POST">
-          <input type="hidden" name="product_id" value="204">
-          <input type="hidden" name="product_name" value="Coat 4">
-          <input type="hidden" name="product_price" value="6550">
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="product_img" value="images/shop (4).jpg">
-          <input type="submit" class="cart-product" value="Add Cart">
-        </form>
-      </div>
-
-      <!-- Product 5 -->
-      <div class="all-items">
-        <div class="watch-images">
-          <img src="images/shop (5).jpg" alt="" class="shop-product-images">
-        </div>
-        <figcaption>Coat</figcaption>
-        <div class="watch-star">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-regular fa-star-half-stroke"></i>
-          <i class="fa-regular fa-star"></i>
-        </div>
-        <p class="watch-price">NPR.6550</p>
-        <a href="#" class="buy-product">Buy</a>
-
-        <!-- Form for Product 5 -->
-        <form action="?" method="POST">
-          <input type="hidden" name="product_id" value="204">
-          <input type="hidden" name="product_name" value="Coat 4">
-          <input type="hidden" name="product_price" value="6550">
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="product_img" value="images/shop (5).jpg">
-          <input type="submit" class="cart-product" value="Add Cart">
-        </form>
-      </div>
-
-      <!-- Display each item dynamically -->
-      <?php
-      if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          $item_id = $row['id'];
-          $item_name = $row['item_name'];
-          $item_price = isset($row['item_price']) ? $row['item_price'] : 0;
-          $item_image = $row['item_image'];
-
-          echo '
-        <div class="all-items add_items">  
-            <div class="watch-images">
-                <img src="' . $item_image . '" alt="' . $item_name . '" class="shop-product-images">
-            </div>
-            <figcaption>' . $item_name . '</figcaption>
-            <div class="watch-star">
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-regular fa-star-half-stroke"></i>
-                <i class="fa-regular fa-star"></i>
-            </div>
-            <p class="watch-price">NPR. ' . number_format($item_price, 2) . '</p>
-            <a href="#" class="buy-product">Buy</a>
-
-            <form action="?" method="POST">
-                <input type="hidden" name="product_id" value="' . $item_id . '">
-                <input type="hidden" name="product_name" value="' . $item_name . '">
-                <input type="hidden" name="product_price" value="' . $item_price . '">
-                <input type="hidden" name="quantity" value="1">
-                <input type="hidden" name="product_img" value="' . $item_image . '">
-                <input type="submit" class="cart-product" value="Add Cart">
-            </form>
-        </div>';
-        }
-      } else {
-        echo '<p>No items available.</p>';
+    <?php
       }
-      ?>
-    </div>
-  </section>
-
-  <!-- Add_Items Section 1 -->
-  <section class="watches-product-section third-section">
-    <div class="watches-section shop-section">
-      <!-- Display each item dynamically -->
-      <?php
-      if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          $item_id = $row['id'];
-          $item_name = $row['item_name'];
-          $item_price = isset($row['item_price']) ? $row['item_price'] : 0;
-          $item_image = $row['item_image'];
-
-          echo '
-        <div class="all-items add_items">  
-            <div class="watch-images">
-                <img src="' . $item_image . '" alt="' . $item_name . '" class="shop-product-images">
-            </div>
-            <figcaption>' . $item_name . '</figcaption>
-            <div class="watch-star">
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-regular fa-star-half-stroke"></i>
-                <i class="fa-regular fa-star"></i>
-            </div>
-            <p class="watch-price">NPR. ' . number_format($item_price, 2) . '</p>
-            <a href="#" class="buy-product">Buy</a>
-
-            <form action="?" method="POST">
-                <input type="hidden" name="product_id" value="' . $item_id . '">
-                <input type="hidden" name="product_name" value="' . $item_name . '">
-                <input type="hidden" name="product_price" value="' . $item_price . '">
-                <input type="hidden" name="quantity" value="1">
-                <input type="hidden" name="product_img" value="' . $item_image . '">
-                <input type="submit" class="cart-product" value="Add Cart">
-            </form>
-        </div>';
-        }
-      } else {
-        echo '<p>No items available.</p>';
+    } else {
+      echo "<p>No categories found in the database.</p>";
+    }
+    ?>
+    <style>
+      .product-description {
+        width: 15vw;
+        align-items: center;
+        text-align: center;
+        height: 8vw;
       }
-      ?>
-    </div>
+    </style>
   </section>
 
   <!-- Footer Section here -->
