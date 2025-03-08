@@ -63,75 +63,60 @@ if (isset($_POST['submit_order'])) {
     $email = $conn->real_escape_string($_POST['email']);
     $address = $conn->real_escape_string($_POST['address']);
     $mobile_number = $conn->real_escape_string($_POST['mobile_number']);
-    $payment_method = $conn->real_escape_string($_POST['payment_method']);
-
+    $payment_method = isset($_POST['payment_method']) ? $conn->real_escape_string($_POST['payment_method']) : '';
     $total_amount = 0;
 
     // Fetch cart items again during order placement
-    $sql = "SELECT c.*, p.item_name, p.product_description, p.product_price, p.item_image, 
-    (c.quantity * p.product_price) AS total_price 
-FROM carts c
-INNER JOIN products p ON c.product_id = p.id
-WHERE c.customer_id = ?";
-    $stmt = $conn->prepare($sql);
+    $query = "SELECT c.id, c.product_id, c.quantity, p.item_price 
+    FROM carts c
+    JOIN products p ON c.product_id = p.id 
+    WHERE c.customer_id = ?";
+    $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $customer_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
-
     while ($item = $result->fetch_assoc()) {
-        $product_price = $item['item_price'];
-        $quantity = $item['quantity'];
-        $total_price = $product_price * $quantity;
-        $total_amount += $total_price;
+        $product_id = $item['product_id'];  // Get product_id from the cart
+        $quantity = $item['quantity'];  // Get quantity from the cart
+        $cart_id = $item['id'];  // Assuming 'cart_id' exists in the cart table
+        $total_price = $item['item_price'] * $quantity; // Calculate total price
 
-        // Insert into orders table
-        $sql = "INSERT INTO myorders (
-                user_name, email, address, mobile_number, 
-                product_id, product_name, product_description, product_price, quantity, product_img, 
-                total_amount, payment_method, order_status, order_date
-            ) VALUES (
-                '$user_name', '$email', '$address', '$mobile_number', 
-                '{$item['product_id']}', '{$item['item_name']}', '{$item['product_description']}', '$product_price', '$quantity', '{$item['item_image']}',
-                '$total_price', '$payment_method', 'Pending', NOW()
-            )";
-        $conn->query($sql);
+        // Insert into myorders table (Only required fields)
+        $sql = "INSERT INTO myorder(
+                product_id, quantity, customer_id, payment_id, address, total_amount, cart_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+        $order_stmt = $conn->prepare($sql);
         $order_stmt->bind_param(
-            "ssssisdsdss",
-            $user_name,
-            $email,
-            $address,
-            $mobile_number,
+            "iiissdi",
             $product_id,
-            $product_name,
-            $product_description,
-            $product_price,
             $quantity,
-            $product_img,
-            $total_amount,
-            $payment_method
+            $customer_id,
+            $payment_id,
+            $address,
+            $total_price,
+            $cart_id
         );
 
         if ($order_stmt->execute()) {
-            // Continue looping through the cart items
+            // Order inserted successfully
         } else {
             echo "<script>alert('Error: " . $order_stmt->error . "');</script>";
         }
     }
-
-    $stmt->close();
 
     // Clear cart after successful order
     $clear_cart_sql = "DELETE FROM carts WHERE customer_id = ?";
     $clear_stmt = $conn->prepare($clear_cart_sql);
     $clear_stmt->bind_param("i", $customer_id);
     if ($clear_stmt->execute()) {
-        echo "<script>alert('Order placed successfully!'); window.location.href='cart.php';</script>";
+        echo "<script>alert('Order placed successfully!'); window.location.href='order.php';</script>";
     } else {
         echo "<script>alert('Error: Could not clear cart.');</script>";
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -419,7 +404,7 @@ WHERE c.customer_id = ?";
                             </div>
                             <div class="fa-icon" style="height:5vw; width:6vw; display: flex; margin-top:-5vw;">
                                 <i class="fa-regular fa-heart"></i>
-                                <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon" >
+                                <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </div>
@@ -863,7 +848,7 @@ WHERE c.customer_id = ?";
 
         getLocation(); // Call function on page load
 
-        document.getElementById("googleMap").addEventListener('click',function(){
+        document.getElementById("googleMap").addEventListener('click', function() {
             window.open("https://www.google.com/maps", "_blank");
         });
     </script>
