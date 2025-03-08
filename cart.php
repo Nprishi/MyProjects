@@ -22,6 +22,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Handle deleting selected items
+// Handle deleting selected items
 if (isset($_POST['delete_selected']) && !empty($_POST['check'])) {
     // Ensure `$_POST['check']` is treated as an array
     $selected_items = (array) $_POST['check'];
@@ -29,10 +30,11 @@ if (isset($_POST['delete_selected']) && !empty($_POST['check'])) {
     // Sanitize and delete the selected items
     $ids_to_delete = implode(',', array_map('intval', $selected_items));
 
-    // Delete the selected items
+    // Delete the selected items from the cart
     $delete_sql = "DELETE FROM carts WHERE id IN ($ids_to_delete) AND customer_id = ?";
     $delete_stmt = $conn->prepare($delete_sql);
     $delete_stmt->bind_param("i", $customer_id);
+
     if ($delete_stmt->execute()) {
         header("Location: cart.php"); // Reload the page to reflect the changes
         exit();
@@ -40,6 +42,7 @@ if (isset($_POST['delete_selected']) && !empty($_POST['check'])) {
         echo "Error: " . $delete_stmt->error;
     }
 }
+
 
 // Handle single item deletion
 if (isset($_GET['delete_id'])) {
@@ -81,6 +84,7 @@ if (isset($_POST['submit_order'])) {
         $quantity = $item['quantity'];  // Get quantity from the cart
         $cart_id = $item['id'];  // Assuming 'cart_id' exists in the cart table
         $total_price = $item['item_price'] * $quantity; // Calculate total price
+        $total_amount += $total_price; // Add it to the total amount
 
         // Insert into myorders table (Only required fields)
         $sql = "INSERT INTO myorder(
@@ -414,6 +418,19 @@ if (isset($_POST['submit_order'])) {
                     <p class="empty_product">No products in the cart.</p>
                 <?php endif; ?>
 
+                <?php
+
+                // Assuming you have the cart items stored in $result variable
+
+                if ($result && $result->num_rows > 0) {
+                    $cart_items_count = $result->num_rows;
+                    $summary_display = 'block';  // Show summary if items exist
+                } else {
+                    $cart_items_count = 0;
+                    $summary_display = 'none';  // Hide summary if cart is empty
+                }
+                ?>
+
             </form>
             <style>
                 .selected {
@@ -474,14 +491,14 @@ if (isset($_POST['submit_order'])) {
             </style>
         </div>
 
-        <div class="right_side" id="summary">
+        <div class="right_side" id="summary" style="display: <?= $summary_display; ?>;">
             <div class="right_side_header">
                 <h3><span>Location</span></h3>
                 <p id="googleMap" style="cursor: pointer; font-weight:bolder;"><i class="fa-solid fa-location-dot" style="color: red;"></i> <span id="state"></span> </p>
             </div>
 
-            <div class="summary">
-                <h4>Order Details</h4>
+            <div class="mysummary">
+                <h4 class="Details-Head">Order Details</h4>
                 <p>Subtotal:</p>
                 <p>Shipping Fee:</p>
                 <input type="text" name="vouchar" class="vouchar" placeholder="Enter Your Token">
@@ -547,7 +564,12 @@ if (isset($_POST['submit_order'])) {
                     #summary {
                         display: flex;
                         flex-direction: column;
-                        height: 15vw;
+                        height: 25vw;
+                    }
+
+                    .Details-Head{
+                        margin-left: 1vw;
+                        color: green;
                     }
 
                     .form_section {
@@ -573,8 +595,9 @@ if (isset($_POST['submit_order'])) {
                     }
 
                     #payment-btn {
-                        background-color: black;
+                        background-color: red;
                         color: #fff;
+                        margin-left: 1vw;
                     }
 
                     .submit {
@@ -597,7 +620,7 @@ if (isset($_POST['submit_order'])) {
         <section class="form_section" id="process_form">
             <div class="order-form">
                 <h4>Enter Receiver Details</h4>
-                <form action="?" method="POST">
+                <form action="?" method="POST" class="form_submit">
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="user_name" placeholder="Enter your full name" required>
 
@@ -609,10 +632,45 @@ if (isset($_POST['submit_order'])) {
 
                     <label for="number">Mobile Number:</label>
                     <input type="tel" name="mobile_number" id="number" pattern="[0-9]{10}" placeholder="e.g., 9800000000" required>
-                    <button type="submit" name="submit_order">Submit</button>
+                    <button type="submit" name="submit_order" class="apply-form">Submit</button>
                 </form>
             </div>
         </section>
+        <style>
+            .form_section {
+                width: 30vw;
+                height: 38vw;
+                align-items: center;
+                background-color: #fff;
+                margin-left: 3vw;
+                margin-top: 1vw;
+                justify-content: center;
+                right: 2vw;
+                border: none;
+            }
+            .form_submit input{
+                margin-bottom: 2vw;
+                width: 80%;
+            }
+            .form_submit{
+                margin-left: 2vw;
+            }
+            .order-form{
+                margin-top: 2vw;
+            }
+            .order-form h4{
+            text-align: center;
+            color:green;
+            }
+            .apply-form{
+                background-color: red;
+                color: white;
+                width: 10vw;
+                padding: 0.5vw;
+                outline: none;
+                border: none;
+            }
+        </style>
     </section>
 
     <!-- Footer Section here -->
@@ -635,7 +693,7 @@ if (isset($_POST['submit_order'])) {
     <style>
         footer {
             position: relative;
-            bottom: -18vw;
+            bottom: -22.8vw;
             width: 95vw;
             margin-left: 2vw;
             margin-top: 1vw;
@@ -771,10 +829,28 @@ if (isset($_POST['submit_order'])) {
             });
         });
 
-        // Select all checkboxes when the 'Select All' Checkbox is clicked
-        document.getElementById('selectAll').addEventListener('click', function() {
-            const checkboxes = document.querySelectorAll('input[name="check[]"]');
-            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        // Select All Functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('input[name="check[]"]');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+
+        // Submit Form and Delete Selected Items
+        document.getElementById('cart-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Check if the delete_selected button was pressed
+            if (document.querySelector('[name="delete_selected"]')) {
+                var selectedCheckboxes = document.querySelectorAll('input[name="check[]"]:checked');
+
+                if (selectedCheckboxes.length > 0) {
+                    this.submit(); // Submit the form if checkboxes are selected
+                } else {
+                    alert("Please select items to delete.");
+                }
+            }
         });
 
         // Toggle payment methods dropdown
@@ -784,17 +860,18 @@ if (isset($_POST['submit_order'])) {
             const summary = document.getElementById('summary');
             if (paymentOption.style.display === 'flex') {
                 paymentOption.style.display = 'none';
-                summary.style.height = '15vw';
+                summary.style.height = '25vw';
             } else {
                 paymentOption.style.display = 'flex';
-                summary.style.height = '28vw';
+                summary.style.height = '38vw';
             }
         });
 
         var cash_delivery = document.getElementById('cash');
-        const summary = document.getElementById('process_form');
+        const process = document.getElementById('process_form');
         cash_delivery.addEventListener('click', function(event) {
-            summary.style.display = "block";
+            process.style.display = "block";
+            process.style.position ="absolute";
         });
 
         // // Select all payment method buttons (cash, esewa, khalti)
@@ -850,6 +927,40 @@ if (isset($_POST['submit_order'])) {
 
         document.getElementById("googleMap").addEventListener('click', function() {
             window.open("https://www.google.com/maps", "_blank");
+        });
+
+        //Cart Empty Managemant
+        document.addEventListener("DOMContentLoaded", function() {
+            // Function to check if the cart has items
+            function updateCartSummaryVisibility() {
+                const cartItems = document.querySelectorAll(".product-card"); // Assuming each product has the class "product-card"
+                const summaryDiv = document.getElementById("summary");
+
+                if (cartItems.length === 0) {
+                    summaryDiv.style.display = "none"; // Hide if no items in cart
+                } else {
+                    summaryDiv.style.display = "block"; // Show if there are items in the cart
+                }
+            }
+
+            // Call the function on page load to check if cart has items
+            updateCartSummaryVisibility();
+
+            // If you have AJAX or actions where items are added/removed, call the function again
+            document.querySelectorAll(".decrement, .increment").forEach(button => {
+                button.addEventListener("click", updateCartSummaryVisibility);
+            });
+
+            // On form submission or AJAX request to delete selected items
+            document.getElementById("cart-form").addEventListener("submit", function(event) {
+                event.preventDefault(); // Prevent form from submitting normally
+
+                // Perform the deletion logic (e.g., via AJAX or form submission)
+
+                // After deletion, check cart status and update summary visibility
+                updateCartSummaryVisibility();
+            });
+
         });
     </script>
 

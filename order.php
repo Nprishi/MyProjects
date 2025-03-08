@@ -12,6 +12,8 @@ if (!isset($_SESSION['user_id'])) {
   
   $customer_id = $_SESSION['user_id'];
   $profile = $_SESSION['user_name'] ?? 'Guest';
+
+  
 ?>
 
 <!DOCTYPE html>
