@@ -4,6 +4,7 @@ session_start();
 
 // Database connection
 include 'connect.php';
+$customer_id = $_SESSION['customer_id'] ?? 0; // Ensure it's not empty
 
 // Assume user_id is being retrieved from session or request
 $user_id = $_SESSION['id']; // or $_GET['user_id'] if passed in URL
@@ -153,8 +154,8 @@ if (isset($_POST['delete_selected']) && !empty($_POST['check'])) {
     }
 }
 
-// Close the database connection
-$conn->close();
+// // Close the database connection
+// $conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -631,73 +632,76 @@ $conn->close();
         <div class="order-list">
             <div class="order-list-header">
                 <h2>Order List</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Order Image</th>
-                            <th>Order Name</th>
-                            <th>Description</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <section class="odSection">
+
+                    <div class="display-orders">
                         <?php
+                        // Fetch all order items for the logged-in customer
+                        $sql = "SELECT o.id AS order_id, o.product_id, o.quantity, o.customer_id, o.payment_id, 
+       o.total_amount, o.address, o.cart_id,
+       p.item_name, p.item_image, p.product_description, p.item_price
+FROM myorder o 
+JOIN products p ON o.product_id = p.id 
+WHERE o.customer_id = ?
+ORDER BY o.id DESC";  // Latest orders first
+
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("i", $customer_id);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        // Display all orders
                         if ($result->num_rows > 0) {
-                            // Output data for each row
+                            echo "<h2>My Orders</h2>";
+                            echo "<table border='1' cellspacing='0' cellpadding='10'>";
+                            echo "<tr>
+    <th>Product Image</th>
+    <th>Product Name</th>
+    <th>Quantity</th>
+    <th>Price</th>
+    <th>Total</th>
+  </tr>";
+
                             while ($row = $result->fetch_assoc()) {
+                                $total_price = $row['item_price'] * $row['quantity'];
                                 echo "<tr>";
-                                echo "<td>" . $row['id'] . "</td>";
-                                echo "<td>";
-                                if (!empty($row['order_image'])) {
-                                    // Display image from blob
-                                    $imageData = base64_encode($row['order_image']);
-                                    echo '<img src="data:image/jpeg;base64,' . $imageData . '" alt="Order Image">';
-                                } else {
-                                    echo "No image";
-                                }
-                                echo "</td>";
-                                echo "<td>" . htmlspecialchars($row['order_name']) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['order_des']) . "</td>";
-                                echo "<td>$" . number_format($row['order_price'], 2) . "</td>";
-                                echo "<td>" . $row['order_qty'] . "</td>";
+                                echo "<td><img src='" . htmlspecialchars($row['item_image']) . "' alt='Product Image' width='50'></td>";
+                                echo "<td>" . htmlspecialchars($row['item_name']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['quantity']) . "</td>";
+                                echo "<td>NPR " . number_format($row['item_price'], 2) . "</td>";
+                                echo "<td>NPR " . number_format($total_price, 2) . "</td>";
                                 echo "</tr>";
                             }
+                            echo "</table>";
                         } else {
-                            echo "<tr><td colspan='6'>No orders found</td></tr>";
+                            echo "<p>No orders found.</p>";
                         }
+
+                        // Close statement and connection
+                        $stmt->close();
                         ?>
-                    </tbody>
-                </table>
+                    </div>
+
+                    <form action="?" method="POST">
+                        <input type="hidden" name="id" value="<?= $order_id ?>">
+                    </form>
+                    <style>
+                        .display-orders {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            text-align: center;
+                            justify-content: center;
+                            width: 50vw;
+                        }
+                    </style>
+                </section>
+
+
             </div>
         </div>
 
         <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 1vw;
-
-            }
-
-            table,
-            th,
-            td {
-                border: 1px solid black;
-            }
-
-            th,
-            td {
-                padding: 10px;
-                text-align: center;
-            }
-
-            img {
-                max-width: 100px;
-                height: auto;
-            }
-
             .order-list {
                 display: flex;
                 flex-direction: column;
