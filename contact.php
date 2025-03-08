@@ -11,6 +11,51 @@ if (!isset($_SESSION['user_id'])) {
 
 $customer_id = $_SESSION['user_id'];
 $profile = $_SESSION['user_name'] ?? 'Guest';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  // Retrieve form data
+  $customer_id = $_SESSION['user_id'] ?? null; // Get logged-in user ID
+  $first_name = trim($_POST['first_name']);
+  $last_name = trim($_POST['last_name']);
+  $email = trim($_POST['email']);
+  $message = trim($_POST['message']);
+
+  // Validate required fields
+  if (empty($first_name) || empty($last_name) || empty($email) || empty($message)) {
+      die("All fields are required.");
+  }
+
+  // Validate email
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      die("Invalid email format.");
+  }
+
+  // Check if customer exists in the database
+  if ($customer_id) {
+      $checkCustomer = $conn->prepare("SELECT customer_id FROM customer WHERE customer_id = ?");
+      $checkCustomer->bind_param("i", $customer_id);
+      $checkCustomer->execute();
+      $checkCustomer->store_result();
+
+      if ($checkCustomer->num_rows === 0) {
+          die("Error: Customer does not exist.");
+      }
+  }
+
+  // Insert data into the contact table
+  $stmt = $conn->prepare("INSERT INTO contact (customer_id, first_name, last_name, email, message) VALUES (?, ?, ?, ?, ?)");
+  $stmt->bind_param("issss", $customer_id, $first_name, $last_name, $email, $message);
+
+  if ($stmt->execute()) {
+      echo "<script>alert('Message sent successfully!'); window.location.href='contact.php';</script>";
+  } else {
+      echo "Error: " . $stmt->error;
+  }
+
+  // Close statement and connection
+  $stmt->close();
+  $conn->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -101,16 +146,16 @@ $profile = $_SESSION['user_name'] ?? 'Guest';
         <img src="images/contact.jpg" alt="">
       </div>
 
-      <form action="">
+      <form action="?" method="POST">
         <h1>Get in Touch</h1>
-        <p>24/7 we will answer your question and problems</p>
+        <p>24/7 we will answer your questions and problems</p>
 
-        <input type="text" placeholder="First Name">
-        <input type="text" placeholder="Last Name">
-        <input type="email" placeholder="Enter Your Email">
-        <textarea name="message" placeholder="Describe your issue"></textarea>
-        <button class="contact-btn">Send</button>
+        <input type="text" name="first_name" placeholder="First Name" required>
+        <input type="text" name="last_name" placeholder="Last Name" required>
+        <input type="email" name="email" placeholder="Enter Your Email" required>
+        <textarea name="message" placeholder="Describe your issue" required></textarea>
 
+        <button type="submit" name="submit" class="contact-btn">Send</button>
       </form>
 
     </div>

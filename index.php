@@ -217,12 +217,13 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 </head>
 
 <body>
-  <!-- Header -->
 
+  <!-- Header -->
   <header>
     <div class="logo">
       <h3>Gadget<span>4</span>U</h3>
     </div>
+
     <!-- Search bar form -->
     <div class="search_product">
       <input type="text" name="search" placeholder="Search products..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>" class="search-input">
@@ -275,7 +276,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         <a href="cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
       </div>
     <?php endif; ?>
-
 
   </header>
 
@@ -413,7 +413,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     </div>
   </section>
 
-  <section class="section-for-three">
+  <!-- <section class="section-for-three">
     <div class="all-image-section">
       <figcaption>30% off all order</figcaption>
       <button class="three-btn">shop now</button>
@@ -427,10 +427,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
       <figcaption>30% off all order</figcaption>
       <button class="three-btn">shop now</button>
     </div>
-  </section>
+  </section> -->
 
   <!-- Fetch database items -->
-  <section class="watches-product-section">
+  <section class="watches-product-section" style="flex-wrap:wrap; border:1px solid red;">
     <?php
     // Query to fetch all categories in ascending order
     $categories_query = "SELECT * FROM category ORDER BY category_id ASC LIMIT 4";
@@ -446,59 +446,63 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         $products_query = "SELECT * FROM products WHERE category_id = $category_id";
         $products_result = $conn->query($products_query);
     ?>
-        <!-- Display Category Name -->
-        <div class="watch-text-sec">
-          <h1 class="watch-h"><?php echo $category_name; ?></h1>
-        </div>
+        <!-- Display Each Seaction -->
+        <div class="mySections">
 
-        <div class="watches-section">
-          <?php
-          // Check if products exist for the current category
-          if ($products_result && $products_result->num_rows > 0) {
-            while ($product = $products_result->fetch_assoc()) {
-              $product_id = htmlspecialchars($product['id']);
-              $product_name = htmlspecialchars($product['item_name']);
-              $product_price = htmlspecialchars($product['item_price']);
-              $product_img = htmlspecialchars($product['item_image']);
-              $product_description = htmlspecialchars($product['product_description']);
-          ?>
-              <!-- Product Card -->
-              <div class="all-items">
-                <div class="watch-images">
-                  <img src="<?php echo $product_img; ?>" alt="<?php echo $product_name; ?>" class="watch-product-images">
-                </div>
-                <h3><?php echo $product_name; ?></h3>
-                <div class="product-description">
-                  <p><?php echo $product_description; ?></p>
-                </div>
-                <div class="watch-star">
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-regular fa-star-half-stroke"></i>
-                </div>
-                <p class="watch-price">NPR. <?php echo number_format($product_price, 2); ?></p>
-                <a href="#" class="buy-product">Buy</a>
+           <!-- Display Category Name -->
+          <div class="watch-text-sec">
+            <h1 class="watch-h"><?php echo $category_name; ?></h1>
+          </div>
 
-                <!-- Add to Cart Button -->
-                <button class="cart-product"
-                  data-product-id="<?php echo $product_id; ?>"
-                  data-product-name="<?php echo $product_name; ?>"
-                  data-product-price="<?php echo $product_price; ?>"
-                  data-product-description="<?php echo $product_description; ?>"
-                  data-product-img="<?php echo $product_img; ?>"
-                  data-quantity="1">
-                  Add Cart
-                </button>
-                <p class="cart-message" style="display: none; color: green;"></p>
-              </div>
-          <?php
+          <div class="watches-section" style="display: flex; flex-wrap: wrap; justify-content: space-around; align-items: center;">
+            <?php
+            // Check if products exist for the current category
+            if ($products_result && $products_result->num_rows > 0) {
+              while ($product = $products_result->fetch_assoc()) {
+                $product_id = htmlspecialchars($product['id']);
+                $product_name = htmlspecialchars($product['item_name']);
+                $product_price = htmlspecialchars($product['item_price']);
+                $product_img = htmlspecialchars($product['item_image']);
+                $product_description = htmlspecialchars($product['product_description']);
+            ?>
+                <!-- Product Card -->
+                <div class="all-items" style="border:2px solid grey; margin-right:2vw; margin-bottom: 5vw;">
+                  <div class="watch-images">
+                    <img src="<?php echo $product_img; ?>" alt="<?php echo $product_name; ?>" class="watch-product-images">
+                  </div>
+                  <h3><?php echo $product_name; ?></h3>
+                  <div class="product-description">
+                    <p><?php echo $product_description; ?></p>
+                  </div>
+                  <div class="watch-star" style="color:orange">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-regular fa-star-half-stroke"></i>
+                  </div>
+                  <p class="watch-price">NPR. <?php echo number_format($product_price, 2); ?></p>
+                  <a href="#" class="buy-product">Buy</a>
+
+                  <!-- Add to Cart Button -->
+                  <button class="cart-product"
+                    data-product-id="<?php echo $product_id; ?>"
+                    data-product-name="<?php echo $product_name; ?>"
+                    data-product-price="<?php echo $product_price; ?>"
+                    data-product-description="<?php echo $product_description; ?>"
+                    data-product-img="<?php echo $product_img; ?>"
+                    data-quantity="1">
+                    Add Cart
+                  </button>
+                  <p class="cart-message" style="display: none; color: green;"></p>
+                </div>
+            <?php
+              }
+            } else {
+              echo "<p>No products found in this category.</p>";
             }
-          } else {
-            echo "<p>No products found in this category.</p>";
-          }
-          ?>
+            ?>
+          </div>
         </div>
     <?php
       }

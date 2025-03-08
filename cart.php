@@ -419,7 +419,7 @@ WHERE c.customer_id = ?";
                             </div>
                             <div class="fa-icon" style="height:5vw; width:6vw; display: flex; margin-top:-5vw;">
                                 <i class="fa-regular fa-heart"></i>
-                                <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon" onclick="return confirm('Are you sure you want to delete this item?');">
+                                <a href="cart.php?delete_id=<?= $row['id']; ?>" class="delete-icon" >
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </div>

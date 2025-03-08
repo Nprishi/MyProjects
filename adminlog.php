@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     include 'connect.php';
 
     $user_name = trim($_POST['admin_name']);
-    $user_password = trim($_POST['admin_password']);
+    $user_password = md5($_POST['admin_password']);
 
     // Prepare and execute the SQL query
     $stmt = $conn->prepare("SELECT * FROM `admin-login` WHERE admin_name = ?");
